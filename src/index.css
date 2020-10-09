@@ -11,3 +11,24 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+button {
+  width: 100px;
+  height: 100px;
+}
+
+.start {
+  background-image: url("assets/bulbasaur.png");
+}
+
+.end {
+  background: url("assets/finishtile.png");
+}
+
+.impassable {
+  background: url("assets/rocktile.png");
+}
+
+.grass {
+  background: url("assets/grasstile.png")
+}
