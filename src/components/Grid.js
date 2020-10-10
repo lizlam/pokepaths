@@ -1,5 +1,7 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
+import { getPath, getXY } from "../utils/Utils";
+import { isCompositeComponent } from "react-dom/test-utils";
 
 const StyledContainer = styled.div`
   width: fit-content;
@@ -28,7 +30,7 @@ const Controls = styled.div`
 `;
 
 function Grid() {
-  const [size, setSize] = useState(1);
+  const [size, setSize] = useState(0);
   const [impassable, setImpassable] = useState([]);
   const [start, setStart] = useState(null);
   const [end, setEnd] = useState(null);
@@ -45,16 +47,76 @@ function Grid() {
   };
 
   const handleChange = (e) => {
-    setSize(e.target.value);
+    let input = parseInt(e.target.value);
+    setSize(input);
   };
+
+  const getPathTiles = (startPoint, entries) => {
+    let pathTiles = [];
+    const expectedEnd = entries.reduce(function (result, entry) {
+      pathTiles.push(result);
+      return [parseInt(result[0]) + entry[0], parseInt(result[1]) + entry[1]]
+    }, startPoint)
+    pathTiles.shift(); // first entry is repeated, so remove
+    return [pathTiles, expectedEnd]
+  }
+
+  const highlightPath = (tiles) => {
+    tiles.map((v) => {
+      console.log(v);
+      const current = getTileRef(v[0], v[1]);
+      current.className = "path";
+    })
+  }
+
+  const getPathHandler = () => {
+    const node = start.split(',');
+    const rocks = impassable.map(v => getXY(v));
+    const promise = getPath(size, getXY(start), getXY(end), rocks);
+    promise.then(res => {
+      const addends = res.moves.map(direction => {
+        let x = parseInt(node[0]);
+        let y = parseInt(node[1]);
+        switch (direction) {
+          case "D":
+            y = 1;
+            x = 0;
+            break;
+          case "U":
+            y = -1;
+            x = 0;
+            break;
+          case "R":
+            x = 1;
+            y = 0;
+            break;
+          case "L":
+            x = -1;
+            y = 0;
+            break;
+          default:
+            console.error("There are no other directions in this dimension.");
+        }
+        return [x, y]
+      })
+      const [pathTiles] = getPathTiles(node, addends);
+      highlightPath(pathTiles);
+    });
+  }
 
   const buttonRef = useRef();
 
+  const getTileRef = (x, y) => {
+    return buttonRef.current.children[parseInt(y)].children[parseInt(x)];
+  }
+
   const handleClick = (e) => {
     const coord = e.target.value;
+    // Get the individual (x,y) coordinates
     const loc = e.target.value.split(',');
-    //setStart({ "x": parseInt(loc[0]), "y": parseInt(loc[1]) });
-    const current = buttonRef.current.children[parseInt(loc[0])].children[parseInt(loc[1])];
+    const x = loc[0];
+    const y = loc[1];
+    const current = getTileRef(x, y);
     const currentClass = current.className;
 
     switch (currentClass) {
@@ -89,6 +151,7 @@ function Grid() {
           break
         } else {
           current.className = "impassable";
+          setImpassable([...impassable, coord]);
         }
         break;
       default:
@@ -103,19 +166,17 @@ function Grid() {
         <StyledButton onClick={handleDecrement}>-</StyledButton>
         <StyledInput type="number" value={size} onChange={handleChange} />
         <StyledButton onClick={handleIncrement}>+</StyledButton>
-        Starting Square: {JSON.stringify(start)}
-        Ending Square: {end}
-        Impassable:{impassable.map((v, i) => <div key={i}>{v[i]}</div>)}
+        <button onClick={getPathHandler}>Show me the way!</button>
       </Controls>
       <StyledContainer ref={buttonRef}>
-        {grid.map((v, x) => {
+        {grid.map((v, y) => {
           return (
-            <div key={x}>
-              {v.map((cell, y) => {
+            <div key={y}>
+              {v.map((cell, x) => {
                 return (
                   <button
                     className="grass"
-                    key={y}
+                    key={x}
                     value={[x, y]}
                     onClick={handleClick}
                   >

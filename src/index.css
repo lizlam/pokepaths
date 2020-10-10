@@ -7,14 +7,25 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
 
 button {
-  width: 100px;
-  height: 100px;
+  width: 36px;
+  height: 36px;
+  content: fit;
+  padding: 2px;
+  margin: 2px;
+  border: 1px double wheat;
+
 }
 
 .start {
@@ -31,4 +42,8 @@ button {
 
 .grass {
   background: url("assets/grasstile.png")
+}
+
+.path {
+  background-color: black;
 }
