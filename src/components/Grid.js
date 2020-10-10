@@ -114,6 +114,7 @@ function Grid() {
 				pathRef.className = 'grass';
 			});
 		}
+		setErrorMessage(null);
 	};
 
 	const getPathTiles = (startPoint, entries) => {
