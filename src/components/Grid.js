@@ -58,7 +58,8 @@ const StyledError = styled.div`
 `;
 
 const StyledMessage = styled(StyledError)`
-border: 1px solid corral;
+  border: 1px solid green;
+  color: green;
 `;
 
 function Grid() {
