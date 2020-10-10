@@ -1,18 +1,20 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import styled from "styled-components";
 import { getPath, getXY } from "../utils/Utils";
-import { isCompositeComponent } from "react-dom/test-utils";
 
 const StyledContainer = styled.div`
   width: fit-content;
   border: 1px solid wheat;
   border-radius: 5px;
   padding: 2rem;
+  min-width: 900px;
+  min-height: 300px;
+  transition: width .3s linear;
 `;
 
 const StyledInput = styled.input`
   width: 30px;
-  font-size: 1rem;
+  font-size: 1.5rem;
   background: transparent;
   color: wheat;
   border: 1px solid wheat;
@@ -21,19 +23,48 @@ const StyledInput = styled.input`
 `;
 
 const StyledButton = styled.button`
-  width: 20px;
-  height: 20px;
+  width: 40px;
+  height: 64px;
+  background: transparent;
+  border: 1px solid wheat;
+  color: wheat;
+  font-size: 1.6rem;
+  border-radius: 8px;
+  margin: 1rem;
+  &:hover {
+    border: 2px solid wheat;
+  }
+`;
+
+const ShowButton = styled(StyledButton)`
+  width: 300px;
+  font-size: 1.5rem;
+  transition: font-size .3s linear;
+  &:hover {
+    font-size: 1.6rem;
+  }
 `;
 
 const Controls = styled.div`
-  flex: display;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+
+`;
+
+const StyledError = styled.div`
+  border: 1px solid red;
+  color: red;
+  border-radius: 5px;
+  padding: 0.5rem;
+  margin-top: 1rem;
 `;
 
 function Grid() {
-  const [size, setSize] = useState(0);
+  const [size, setSize] = useState(2);
   const [impassable, setImpassable] = useState([]);
   const [start, setStart] = useState(null);
   const [end, setEnd] = useState(null);
+  const [errorMessage, setErrorMessage] = useState();
   const row = Array(size).fill({ type: "grass" });
   const grid = Array(size).fill(row);
 
@@ -47,9 +78,20 @@ function Grid() {
   };
 
   const handleChange = (e) => {
-    let input = parseInt(e.target.value);
-    setSize(input);
+    if (e.target.value) {
+      let input = parseInt(e.target.value);
+      setSize(input);
+    }
   };
+
+  const reset = () => {
+    console.log(start);
+    console.log(end);
+    console.log(impassable);
+    //const startRef = getTileRef(start[0], start[1]);
+    //startRef.className = "grass";
+
+  }
 
   const getPathTiles = (startPoint, entries) => {
     let pathTiles = [];
@@ -69,7 +111,18 @@ function Grid() {
     })
   }
 
+  const validate = () => {
+    if (start && end !== null) {
+      return true;
+    } else {
+      return false;
+    }
+  }
   const getPathHandler = () => {
+    if (!validate()) {
+      setErrorMessage("Please select a starting and ending tile.");
+      return;
+    }
     const node = start.split(',');
     const rocks = impassable.map(v => getXY(v));
     const promise = getPath(size, getXY(start), getXY(end), rocks);
@@ -111,11 +164,13 @@ function Grid() {
   }
 
   const handleClick = (e) => {
+    setErrorMessage(null);
     const coord = e.target.value;
     // Get the individual (x,y) coordinates
     const loc = e.target.value.split(',');
     const x = loc[0];
     const y = loc[1];
+    //const coord = [x, y];
     const current = getTileRef(x, y);
     const currentClass = current.className;
 
@@ -162,11 +217,16 @@ function Grid() {
   return (
     <>
       <Controls>
-        Size
-        <StyledButton onClick={handleDecrement}>-</StyledButton>
-        <StyledInput type="number" value={size} onChange={handleChange} />
-        <StyledButton onClick={handleIncrement}>+</StyledButton>
-        <button onClick={getPathHandler}>Show me the way!</button>
+        <div>
+          <StyledButton onClick={handleDecrement}>-</StyledButton>
+          <StyledInput type="number" value={size} onChange={handleChange} />
+          <StyledButton onClick={handleIncrement}>+</StyledButton>
+        </div>
+        <div>
+          <ShowButton onClick={getPathHandler}>Show me the way!</ShowButton>
+          <ShowButton onClick={reset}>Reset</ShowButton>
+        </div>
+
       </Controls>
       <StyledContainer ref={buttonRef}>
         {grid.map((v, y) => {
@@ -180,7 +240,6 @@ function Grid() {
                     value={[x, y]}
                     onClick={handleClick}
                   >
-                    {`(${x},${y})`}
                   </button>
                 )
               })}
@@ -188,6 +247,9 @@ function Grid() {
           );
         })}
       </StyledContainer>
+      {errorMessage && (
+        <StyledError>{errorMessage}</StyledError>
+      )}
     </>
   );
 }
