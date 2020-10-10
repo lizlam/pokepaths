@@ -9,7 +9,6 @@ const StyledContainer = styled.div`
 	padding: 2rem;
 	min-width: 900px;
 	min-height: 300px;
-	transition: width .3s linear;
 `;
 
 const StyledInput = styled.input`
@@ -59,7 +58,7 @@ const StyledError = styled.div`
 `;
 
 const StyledMessage = styled(StyledError)`
-  border: 1px solid corral;
+border: 1px solid corral;
 `;
 
 function Grid() {
@@ -67,10 +66,12 @@ function Grid() {
 	const [ impassable, setImpassable ] = useState([]);
 	const [ start, setStart ] = useState(null);
 	const [ end, setEnd ] = useState(null);
+	const [ path, setPath ] = useState([]);
 	const [ errorMessage, setErrorMessage ] = useState();
 	const [ loading, setLoading ] = useState(false);
 	const row = Array(size).fill({ type: 'grass' });
 	const grid = Array(size).fill(row);
+	const buttonRef = useRef();
 
 	const handleDecrement = () => {
 		size > 1 && setSize(size - 1);
@@ -89,11 +90,29 @@ function Grid() {
 	};
 
 	const reset = () => {
-		console.log(start);
-		console.log(end);
-		console.log(impassable);
-		//const startRef = getTileRef(start[0], start[1]);
-		//startRef.className = "grass";
+		if (start !== null) {
+			const startRef = getTileRef(start[0], start[1]);
+			startRef.className = 'grass';
+			setStart(null);
+		}
+		if (end !== null) {
+			const endRef = getTileRef(end[0], end[1]);
+			endRef.className = 'grass';
+			setEnd(null);
+		}
+		if (impassable !== []) {
+			impassable.map((tile) => {
+				const rockRef = getTileRef(tile[0], tile[1]);
+				rockRef.className = 'grass';
+			});
+			setImpassable([]);
+		}
+		if (path !== []) {
+			path.map((tile) => {
+				const pathRef = getTileRef(tile[0], tile[1]);
+				pathRef.className = 'grass';
+			});
+		}
 	};
 
 	const getPathTiles = (startPoint, entries) => {
@@ -108,7 +127,6 @@ function Grid() {
 
 	const highlightPath = (tiles) => {
 		tiles.map((v) => {
-			console.log(v);
 			const current = getTileRef(v[0], v[1]);
 			current.className = 'path';
 		});
@@ -128,7 +146,7 @@ function Grid() {
 			return;
 		}
 		setLoading(true);
-		const node = start.split(',');
+		const node = start;
 		const rocks = impassable.map((v) => getXY(v));
 		const promise = getPath(size, getXY(start), getXY(end), rocks);
 		promise
@@ -159,13 +177,12 @@ function Grid() {
 					return [ x, y ];
 				});
 				const [ pathTiles ] = getPathTiles(node, addends);
+				setPath(pathTiles);
 				highlightPath(pathTiles);
 			})
 			.catch(() => setErrorMessage('Unable to find a proper path.'));
 		setLoading(false);
 	};
-
-	const buttonRef = useRef();
 
 	const getTileRef = (x, y) => {
 		return buttonRef.current.children[parseInt(y)].children[parseInt(x)];
@@ -173,15 +190,10 @@ function Grid() {
 
 	const handleClick = (e) => {
 		setErrorMessage(null);
-
-		// TODO: refactor this
-		const coord = e.target.value;
-		//const coord = [x, y];
-
-		// Get the individual (x,y) coordinates
 		const loc = e.target.value.split(',');
 		const x = loc[0];
 		const y = loc[1];
+		const coord = [ x, y ];
 		const current = getTileRef(x, y);
 		const currentClass = current.className;
 
@@ -234,8 +246,12 @@ function Grid() {
 					<StyledButton onClick={handleIncrement}>+</StyledButton>
 				</div>
 				<div>
-					<ShowButton onClick={getPathHandler}>Show me the way!</ShowButton>
-					<ShowButton onClick={reset}>Reset</ShowButton>
+					<ShowButton id="getpath" onClick={getPathHandler}>
+						Show me the way!
+					</ShowButton>
+					<ShowButton id="reset" onClick={reset}>
+						Reset
+					</ShowButton>
 				</div>
 			</Controls>
 			<StyledContainer ref={buttonRef}>

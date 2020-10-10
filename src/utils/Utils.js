@@ -13,7 +13,7 @@ export async function getPath(n, start, end, impassable) {
 			y: end.y
 		}
 	};
-	console.log(fetchObj);
+
 	const response = await fetch(url, {
 		method: 'POST',
 		headers: {
@@ -25,10 +25,9 @@ export async function getPath(n, start, end, impassable) {
 	return result;
 }
 
-// Turns "x,y" => { "x": x, "y": y }
+// Turns [x,y] => { "x": x, "y": y }
 export const getXY = (arr) => {
-	const loc = arr.split(',');
-	const x = parseInt(loc[0]);
-	const y = parseInt(loc[1]);
+	const x = parseInt(arr[0]);
+	const y = parseInt(arr[1]);
 	return { x: x, y: y };
 };

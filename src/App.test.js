@@ -77,3 +77,19 @@ test('render end tile on first click if start tile already defined', () => {
 	expect(tiles[0]).toHaveProperty('className', 'start');
 	expect(tiles[1]).toHaveProperty('className', 'end');
 });
+
+test('rerender grass tiles on reset', () => {
+	const { container } = render(<App />);
+	const tiles = container.querySelectorAll('.grass');
+	fireEvent.click(tiles[0]);
+	fireEvent.click(tiles[1]);
+	fireEvent.click(tiles[2]);
+	fireEvent.click(tiles[3]);
+
+	const resetButton = container.querySelector('#reset');
+	fireEvent.click(resetButton);
+	expect(tiles[0]).toHaveProperty('className', 'grass');
+	expect(tiles[1]).toHaveProperty('className', 'grass');
+	expect(tiles[2]).toHaveProperty('className', 'grass');
+	expect(tiles[3]).toHaveProperty('className', 'grass');
+});
