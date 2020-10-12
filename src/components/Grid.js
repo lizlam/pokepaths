@@ -133,6 +133,7 @@ function Grid() {
 		const marked = tiles.map((v) => {
 			const current = getTileRef(v[0], v[1]);
 			current.className = 'path';
+			return current;
 		});
 		return marked;
 	};
