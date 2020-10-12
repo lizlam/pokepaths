@@ -105,6 +105,7 @@ function Grid() {
 			impassable.map((tile) => {
 				const rockRef = getTileRef(tile[0], tile[1]);
 				rockRef.className = 'grass';
+				return rockRef;
 			});
 			setImpassable([]);
 		}
@@ -112,6 +113,7 @@ function Grid() {
 			path.map((tile) => {
 				const pathRef = getTileRef(tile[0], tile[1]);
 				pathRef.className = 'grass';
+				return pathRef;
 			});
 		}
 		setErrorMessage(null);
@@ -128,10 +130,11 @@ function Grid() {
 	};
 
 	const highlightPath = (tiles) => {
-		tiles.map((v) => {
+		const marked = tiles.map((v) => {
 			const current = getTileRef(v[0], v[1]);
 			current.className = 'path';
 		});
+		return marked;
 	};
 
 	const validate = () => {
